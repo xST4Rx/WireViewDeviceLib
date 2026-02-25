@@ -32,7 +32,7 @@ namespace WireView2.Device
         private const UInt32 THEME_HIGHLIGHT_COLOR_TG2 = 0xFFBEBEBE; // TG light gray
         private const UInt32 THEME_BACKGROUND_COLOR_TG2 = 0xFF000000; // Black
 
-        private const UInt32 THEME_PRIMARY_COLOR_TG3 = 0xFFFFFFFF; // White
+        private const UInt32 THEME_PRIMARY_COLOR_TG3 = 0xFF969696; // Grey
         private const UInt32 THEME_SECONDARY_COLOR_TG3 = 0xFF505050; // Lighter gray
         private const UInt32 THEME_HIGHLIGHT_COLOR_TG3 = 0xFFFFFFFF; // White
         private const UInt32 THEME_BACKGROUND_COLOR_TG3 = 0xFF000000; // Black
