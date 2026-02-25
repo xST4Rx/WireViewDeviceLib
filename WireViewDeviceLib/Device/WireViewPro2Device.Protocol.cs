@@ -239,6 +239,13 @@ namespace WireView2.Device
             AVG_NUM
         }
 
+
+        public enum DISPLAY_INVERSION : byte {
+            DISPLAY_INVERSION_OFF,
+            DISPLAY_INVERSION_ON,
+            DISPLAY_INVERSION_NUM
+        }
+
         [StructLayout(LayoutKind.Sequential, Pack = 4)]
         public struct UiConfigStructV1
         {
@@ -269,6 +276,7 @@ namespace WireView2.Device
             public UInt32 BackgroundColor;
             public byte BackgroundBitmapId;
             public byte FanBitmapId;
+            public DISPLAY_INVERSION DisplayInversion;
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 4, CharSet = CharSet.Ansi)]
@@ -451,7 +459,8 @@ namespace WireView2.Device
                     HighlightColor = configV2.Ui.Theme == Theme.ThemeTg1 ? THEME_HIGHLIGHT_COLOR_TG1 : configV2.Ui.Theme == Theme.ThemeTg2 ? THEME_HIGHLIGHT_COLOR_TG2 : THEME_HIGHLIGHT_COLOR_TG3,
                     BackgroundColor = configV2.Ui.Theme == Theme.ThemeTg1 ? THEME_BACKGROUND_COLOR_TG1 : configV2.Ui.Theme == Theme.ThemeTg2 ? THEME_BACKGROUND_COLOR_TG2 : THEME_BACKGROUND_COLOR_TG3,
                     BackgroundBitmapId = configV2.Ui.Theme == Theme.ThemeTg1 ? (byte)THEME_BACKGROUND.ThermalGrizzlyOrange : configV2.Ui.Theme == Theme.ThemeTg2 ? (byte)THEME_BACKGROUND.ThermalGrizzlyDark : (byte)THEME_BACKGROUND.Disabled,
-                    FanBitmapId = configV2.Ui.Theme == Theme.ThemeTg1 ? (byte)THEME_FAN.ThermalGrizzlyOrange : configV2.Ui.Theme == Theme.ThemeTg2 ? (byte)THEME_FAN.ThermalGrizzlyDark : (byte)THEME_FAN.ThermalGrizzlyBlackWhite
+                    FanBitmapId = configV2.Ui.Theme == Theme.ThemeTg1 ? (byte)THEME_FAN.ThermalGrizzlyOrange : configV2.Ui.Theme == Theme.ThemeTg2 ? (byte)THEME_FAN.ThermalGrizzlyDark : (byte)THEME_FAN.ThermalGrizzlyBlackWhite,
+                    DisplayInversion = DISPLAY_INVERSION.DISPLAY_INVERSION_OFF // Default off
                 }
             };
             return configV3;
