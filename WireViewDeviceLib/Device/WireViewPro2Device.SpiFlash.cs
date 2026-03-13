@@ -245,11 +245,18 @@ public partial class WireViewPro2Device
 
             uint firstSector = addr / SpiFlashSectorSizeBytes;
             uint firstSectorAddr = firstSector * SpiFlashSectorSizeBytes;
-            uint startPageAddr = (uint)firstSector * SpiFlashSectorSizeBytes;
+
+            // Preserve-sector writes must operate on whole sectors.
+            // Start at the first affected sector boundary and cover through the end of the last affected sector.
+            uint startPageAddr = firstSectorAddr;
+
             uint lastSector = (addr + len - 1) / SpiFlashSectorSizeBytes;
             uint lastSectorAddr = lastSector * SpiFlashSectorSizeBytes;
-            uint lastPageAddr = lastSector * SpiFlashSectorSizeBytes;
-            uint existingDataSize = (lastSectorAddr + SpiFlashSectorSizeBytes) - startPageAddr;
+            uint endAddrExclusive = lastSectorAddr + SpiFlashSectorSizeBytes;
+
+            // Page addresses are inclusive; write/read up to the last page that fits inside the covered sectors.
+            uint lastPageAddr = endAddrExclusive - SpiFlashPageSize;
+            uint existingDataSize = endAddrExclusive - startPageAddr;
 
             byte[] writeBuf = new byte[existingDataSize];
 
@@ -263,10 +270,6 @@ public partial class WireViewPro2Device
 
                 try
                 {
-                    // Read existing data to existingDataBuf
-                    var readFrame = new byte[1 + 4 + 4];
-                    readFrame[0] = CmdSpiFlashReadPage;
-
                     for (uint pageAddr = startPageAddr; pageAddr <= lastPageAddr; pageAddr += SpiFlashPageSize)
                     {
                         ct.ThrowIfCancellationRequested();
