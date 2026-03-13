@@ -116,4 +116,38 @@ public partial class WireViewPro2Device
         var offset = GetThemeBackgroundOffset(background);
         return WriteSpiFlashBytesPreserveSectorsAsync(offset, rgb565Bytes, progress, ct);
     }
+
+    public Task WriteThemeFanRgb565Async(
+        THEME_FAN fan,
+        ReadOnlyMemory<byte> frame1Rgb565Bytes,
+        ReadOnlyMemory<byte> frame2Rgb565Bytes,
+        IProgress<double>? progress = null,
+        CancellationToken ct = default)
+    {
+        if (frame1Rgb565Bytes.Length != THEME_FAN_SIZE)
+            throw new ArgumentException($"Fan frame must be exactly {THEME_FAN_SIZE} bytes (RGB565 {ThemeFanWidth}x{ThemeFanHeight}).", nameof(frame1Rgb565Bytes));
+
+        if (frame2Rgb565Bytes.Length != THEME_FAN_SIZE)
+            throw new ArgumentException($"Fan frame must be exactly {THEME_FAN_SIZE} bytes (RGB565 {ThemeFanWidth}x{ThemeFanHeight}).", nameof(frame2Rgb565Bytes));
+
+        var (f1, f2) = GetThemeFanOffsets(fan);
+
+        return WriteThemeFanInternalAsync(f1, f2, frame1Rgb565Bytes, frame2Rgb565Bytes, progress, ct);
+    }
+
+    private async Task WriteThemeFanInternalAsync(
+        uint frame1Addr,
+        uint frame2Addr,
+        ReadOnlyMemory<byte> frame1Rgb565Bytes,
+        ReadOnlyMemory<byte> frame2Rgb565Bytes,
+        IProgress<double>? progress,
+        CancellationToken ct)
+    {
+        // Split progress 50/50 between the two writes
+        var p1 = progress is null ? null : new Progress<double>(p => progress.Report(p * 0.5));
+        var p2 = progress is null ? null : new Progress<double>(p => progress.Report(0.5 + (p * 0.5)));
+
+        await WriteSpiFlashBytesPreserveSectorsAsync(frame1Addr, frame1Rgb565Bytes, p1, ct).ConfigureAwait(false);
+        await WriteSpiFlashBytesPreserveSectorsAsync(frame2Addr, frame2Rgb565Bytes, p2, ct).ConfigureAwait(false);
+    }
 }
