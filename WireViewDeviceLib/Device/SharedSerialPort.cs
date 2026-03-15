@@ -49,12 +49,23 @@ namespace WireView2.Device
 
         public new bool Open()
         {
+            var acquired = false;
             try
             {
-                if (_mutex.WaitOne(MutexTimeout))
+                acquired = _mutex.WaitOne(MutexTimeout);
+                if (acquired)
                 {
-                    base.Open();
-                    hasMutex = true;
+                    try
+                    {
+                        base.Open();
+                        hasMutex = true;
+                    }
+                    catch (Exception ex)
+                    {
+                        hasMutex = false;
+                        Debug.WriteLine($"[{DateTime.Now.ToString("mm:ss.fff")}] SharedSerialPort.Open: {ex.Message}");
+                        throw;
+                    }
                 }
             }
             catch (AbandonedMutexException)
@@ -63,21 +74,27 @@ namespace WireView2.Device
                 // We can still acquire it, so just proceed.
                 try
                 {
+                    acquired = true;
                     base.Open();
                     hasMutex = true;
                 }
                 catch (Exception ex)
                 {
-                    _mutex.ReleaseMutex();
                     hasMutex = false;
                     Debug.WriteLine($"[{DateTime.Now.ToString("mm:ss.fff")}] SharedSerialPort.Open: {ex.Message}");
                 }
             }
             catch (Exception ex)
             {
-                _mutex.ReleaseMutex();
                 hasMutex = false;
                 Debug.WriteLine($"[{DateTime.Now.ToString("mm:ss.fff")}] SharedSerialPort.Open: {ex.Message}");
+            }
+            finally
+            {
+                if (acquired && !hasMutex)
+                {
+                    try { _mutex.ReleaseMutex(); } catch { }
+                }
             }
             return hasMutex;
         }
