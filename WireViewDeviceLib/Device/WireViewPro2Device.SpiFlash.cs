@@ -208,7 +208,7 @@ public partial class WireViewPro2Device
         BinaryPrimitives.WriteUInt32LittleEndian(header.AsSpan(5, 4), (uint)data.Length);
 
         SpiFlashWriteAllChunked(header, 64, 0);
-        SpiFlashWriteAllChunked(data, 64, 1);
+        SpiFlashWriteAllChunked(data, 64, 0);
 
         var result = SpiFlashReadResult((uint)data.Length * 100);
         if (!result)
@@ -318,10 +318,9 @@ public partial class WireViewPro2Device
 
         while (result == 0 && DateTime.UtcNow < startTime.AddMilliseconds(timeoutMs))
         {
-            Thread.Sleep(1);
-            byte[] buffer = new byte[1];
             if (_port!.BytesToRead > 0)
             {
+                byte[] buffer = new byte[1];
                 _port!.Read(buffer, 0, 1);
                 result = buffer[0];
             }
